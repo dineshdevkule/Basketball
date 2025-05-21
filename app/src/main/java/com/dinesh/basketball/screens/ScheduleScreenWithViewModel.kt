@@ -1,7 +1,9 @@
 package com.dinesh.basketball.screens
 
+import android.app.Activity
 import android.os.Build
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -56,6 +58,14 @@ import java.util.Locale
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ScheduleScreenWithViewModel(state: UiState) {
+
+    val context = LocalContext.current
+    val activity = context as? Activity
+
+    BackHandler {
+        activity?.finish()
+    }
+
     ScheduleScreen(state)
 }
 
