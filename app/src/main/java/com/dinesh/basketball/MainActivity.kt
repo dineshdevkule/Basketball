@@ -20,6 +20,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -29,14 +31,15 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavType
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import com.dinesh.basketball.screens.GamesScreenWithViewModel
 import com.dinesh.basketball.screens.ScheduleScreenWithViewModel
+import com.dinesh.basketball.state.UiState
 import com.dinesh.basketball.ui.theme.BasketballTheme
+import com.dinesh.basketball.viewmodels.BasketballViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -145,13 +148,16 @@ fun App(){
 
         }
 
+        val viewModel: BasketballViewModel = hiltViewModel()
+        val state by viewModel.uiState.collectAsState(UiState.Loading)
+
         NavHost(navController = navController, startDestination = "schedule"){
             composable(route = "schedule") {
-                ScheduleScreenWithViewModel()
+                ScheduleScreenWithViewModel(state)
                 selectedTab.value = "schedule"
             }
             composable(route = "games") {
-                GamesScreenWithViewModel()
+                GamesScreenWithViewModel(state)
                 selectedTab.value = "games"
             }
         }
