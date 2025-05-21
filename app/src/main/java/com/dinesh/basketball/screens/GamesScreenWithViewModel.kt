@@ -28,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -52,7 +53,7 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun GamesScreenWithViewModel() {
     val viewModel: BasketballViewModel = hiltViewModel()
-    val state by viewModel.uiState.observeAsState(UiState.Loading)
+    val state by viewModel.uiState.collectAsState(UiState.Loading)
     GamesScreen(state)
 }
 

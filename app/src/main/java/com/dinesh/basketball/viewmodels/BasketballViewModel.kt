@@ -9,14 +9,16 @@ import com.dinesh.basketball.repository.BasketballRepository
 import com.dinesh.basketball.state.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class BasketballViewModel @Inject constructor(private  val repository: BasketballRepository):ViewModel() {
 
-    private val _uiState = MutableLiveData<UiState>(UiState.Loading)
-    val uiState: LiveData<UiState> = _uiState
+    private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
+    val uiState: StateFlow<UiState> = _uiState
 
     init {
         fetchData()

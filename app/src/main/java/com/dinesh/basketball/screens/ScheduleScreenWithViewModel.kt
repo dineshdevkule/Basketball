@@ -10,13 +10,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
@@ -25,19 +22,16 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.BiasAbsoluteAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
@@ -67,7 +61,7 @@ import java.util.Locale
 @Composable
 fun ScheduleScreenWithViewModel() {
     val viewModel: BasketballViewModel = hiltViewModel()
-    val state by viewModel.uiState.observeAsState(UiState.Loading)
+    val state by viewModel.uiState.collectAsState(UiState.Loading)
     ScheduleScreen(state)
 }
 
@@ -88,27 +82,50 @@ fun ScheduleScreen(state: UiState) {
                 YearMonth.from(ZonedDateTime.parse(it.dateTime))
             }
 
-            // Map month to its first index in the sorted schedule
+            showLogs("scheduleByMonth = $scheduleByMonth")
+
+
+            // Map month to its first index in the sorted schedule for scroll by month
             val monthStartIndexes = scheduleByMonth.entries
                 .associate { it.key to sortedSchedule.indexOfFirst { game ->
                     YearMonth.from(ZonedDateTime.parse(game.dateTime)) == it.key
                 } }
 
+
+            showLogs("monthStartIndexes = $monthStartIndexes")
+
+
             // Get the list of months, sorted in chronological order
             val months = scheduleByMonth.keys.sorted()
+
+
+            showLogs("months = $months")
+
 
             // LazyList state for scrolling
             val listState = rememberLazyListState()
             val coroutineScope = rememberCoroutineScope()
 
+
+
             // Find the next game after current date
-            val nextGameIndex = sortedSchedule.indexOfFirst {
+            var nextGameIndex = sortedSchedule.indexOfFirst {
                 try {
                     ZonedDateTime.parse(it.dateTime).isAfter(ZonedDateTime.now())
                 } catch (e: Exception) {
                     false
                 }
             }.coerceAtLeast(0)
+
+
+
+            // show scroll to bottom
+            if (nextGameIndex == 0){
+                nextGameIndex = sortedSchedule.size
+            }
+
+            showLogs("nextGameIndex = $nextGameIndex")
+
 
             // Automatically scroll to the next game
             LaunchedEffect(nextGameIndex) {
@@ -124,8 +141,15 @@ fun ScheduleScreen(state: UiState) {
                 months.indexOfFirst { it == currentMonthFromDate }.takeIf { it >= 0 } ?: 0
             }
 
+
+            showLogs("currentMonthIndex = $currentMonthIndex")
+
+
             // Track the currently visible month based on scroll position
             var displayedMonthIndex by remember { mutableStateOf(currentMonthIndex) }
+
+            showLogs("displayedMonthIndex = $displayedMonthIndex")
+
 
             // Update displayed month dynamically as the list scrolls
             LaunchedEffect(listState.firstVisibleItemIndex) {
